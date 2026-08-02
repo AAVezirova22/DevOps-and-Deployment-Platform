@@ -14,6 +14,8 @@ DeployKit needs a small set of local tools. All of them are available without a 
 
 ## Check Your Machine
 
+Run these commands from the DeployKit project folder after cloning this repository.
+
 macOS or Linux:
 
 ```sh

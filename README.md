@@ -4,6 +4,8 @@ DeployKit is a lightweight self-hosted deployment platform for small engineering
 
 The project is intentionally compact, but it demonstrates the same concerns senior engineers deal with in production platforms: repeatable infrastructure, isolated deploy environments, observable rollouts, automated rollback, CI checks, and clear operational documentation.
 
+Hosted project UI: <https://aavezirova22.github.io/DevOps-and-Deployment-Platform/>
+
 ## What It Does
 
 - `deployctl init` creates a project deployment config.
@@ -39,6 +41,13 @@ site/                          responsive GitHub Pages project UI
 
 ## Quick Start
 
+Clone this repository and enter the DeployKit project folder:
+
+```sh
+git clone https://github.com/AAVezirova22/DevOps-and-Deployment-Platform.git
+cd DevOps-and-Deployment-Platform
+```
+
 Install prerequisites:
 
 - Go 1.22 or newer
@@ -48,26 +57,36 @@ Install prerequisites:
 - Terraform
 - access to a Kubernetes cluster
 
-See [docs/prerequisites.md](docs/prerequisites.md) for macOS, Windows, and Linux install commands. You can verify your machine with:
+See [docs/prerequisites.md](docs/prerequisites.md) for macOS, Windows, and Linux install commands.
+
+Run these verification and build commands from the DeployKit project folder.
+
+Verify your machine on macOS or Linux:
 
 ```sh
 make check-prereqs
 ```
 
-Build the CLI on macOS or Linux:
+Verify your machine on Windows PowerShell:
+
+```powershell
+.\scripts\check-prereqs.ps1
+```
+
+Build the CLI on macOS or Linux from the DeployKit project folder:
 
 ```sh
 make build
 ```
 
-Build the CLI on Windows PowerShell:
+Build the CLI on Windows PowerShell from the DeployKit project folder:
 
 ```powershell
 New-Item -ItemType Directory -Force bin
 go build -o bin\deployctl.exe .\cmd\deployctl
 ```
 
-Create a deployment config in another application repository:
+Create a deployment config from another application repository, not from the DeployKit project folder:
 
 macOS or Linux:
 
@@ -209,9 +228,11 @@ See [docs/ci-cd.md](docs/ci-cd.md) for pipeline details and recommended branch r
 
 ## Hosted Project UI
 
-The `site/` directory contains a responsive static UI for GitHub Pages. It gives visitors a quicker way to understand the project, copy install commands, and jump into the engineering docs.
+The project UI is live at <https://aavezirova22.github.io/DevOps-and-Deployment-Platform/>.
 
-GitHub Pages deployment is handled by `.github/workflows/pages.yml`. In the repository settings, set Pages source to GitHub Actions if it is not already enabled.
+The `site/` directory contains the responsive static UI for GitHub Pages. It gives visitors a quicker way to understand the project, copy install commands, and jump into the engineering docs.
+
+GitHub Pages deployment is handled by `.github/workflows/pages.yml`.
 
 ## Why These Technologies
 
@@ -239,37 +260,37 @@ See [docs/target-customers.md](docs/target-customers.md) for a deeper customer b
 
 ## Development
 
-Run tests on macOS or Linux:
+Run tests on macOS or Linux from the DeployKit project folder:
 
 ```sh
 make test
 ```
 
-Run tests on Windows PowerShell:
+Run tests on Windows PowerShell from the DeployKit project folder:
 
 ```powershell
 go test ./...
 ```
 
-Render example manifests on macOS or Linux:
+Render example manifests on macOS or Linux from the DeployKit project folder:
 
 ```sh
 make render-example
 ```
 
-Render example manifests on Windows PowerShell:
+Render example manifests on Windows PowerShell from the DeployKit project folder:
 
 ```powershell
 go run .\cmd\deployctl render --config deploykit.example.yaml
 ```
 
-Run the no-cost Kubernetes API smoke test with kind:
+Run the no-cost Kubernetes API smoke test with kind from the DeployKit project folder:
 
 ```sh
 make smoke-test
 ```
 
-Build the container image:
+Build the container image from the DeployKit project folder:
 
 ```sh
 docker build -t deploykit/deployctl:local .

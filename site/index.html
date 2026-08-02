@@ -11,29 +11,42 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="site-header">
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <header class="site-header" data-site-header>
       <a class="brand" href="#top" aria-label="DeployKit home">
         <span class="brand-mark">dk</span>
         <span>DeployKit</span>
       </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open navigation">
+        <span></span>
+        <span></span>
+      </button>
       <nav class="nav" aria-label="Main navigation">
-        <a href="#install">Install</a>
-        <a href="#workflow">Workflow</a>
-        <a href="#production">Production</a>
-        <a href="#docs">Docs</a>
+        <span class="nav-indicator" aria-hidden="true"></span>
+        <a href="#install" data-nav-link>Install</a>
+        <a href="#workflow" data-nav-link>Workflow</a>
+        <a href="#production" data-nav-link>Production</a>
+        <a href="#docs" data-nav-link>Docs</a>
       </nav>
       <a class="header-action" href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform">GitHub</a>
     </header>
+    <div class="mobile-nav" id="site-nav" data-mobile-nav>
+      <a href="#install">Install</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#production">Production</a>
+      <a href="#docs">Docs</a>
+      <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform">GitHub</a>
+    </div>
 
     <main id="top">
-      <section class="hero">
+      <section class="hero" data-section="top">
         <img
           class="hero-image"
           src="assets/deploykit-hero.png"
           alt="A developer workstation showing deployment status, service cards, logs, and infrastructure topology"
         />
         <div class="hero-overlay" aria-hidden="true"></div>
-        <div class="hero-content">
+        <div class="hero-content reveal">
           <p class="eyebrow">Self-hosted deployments for small teams</p>
           <h1>DeployKit</h1>
           <p class="hero-copy">
@@ -46,7 +59,7 @@
         </div>
       </section>
 
-      <section class="status-strip" aria-label="Project capabilities">
+      <section class="status-strip reveal-group" aria-label="Project capabilities">
         <div>
           <span class="metric">Go CLI</span>
           <span class="caption">single binary workflow</span>
@@ -65,8 +78,8 @@
         </div>
       </section>
 
-      <section id="install" class="section">
-        <div class="section-heading">
+      <section id="install" class="section" data-section="install">
+        <div class="section-heading reveal">
           <p class="eyebrow">Run it locally</p>
           <h2>Install, check, deploy</h2>
           <p>
@@ -74,7 +87,7 @@
           </p>
         </div>
 
-        <div class="command-panel">
+        <div class="command-panel reveal">
           <div class="tabs" role="tablist" aria-label="Operating system commands">
             <button class="tab is-active" type="button" data-tab="mac">macOS</button>
             <button class="tab" type="button" data-tab="windows">Windows</button>
@@ -91,6 +104,7 @@ brew install hashicorp/tap/terraform</code></pre>
             </div>
             <div class="command-block">
               <div class="command-title">Verify and build</div>
+              <p class="command-context">Run from the DeployKit project folder after cloning this repository.</p>
               <button class="copy-button" type="button" data-copy="make check-prereqs&#10;make build&#10;make smoke-test">Copy</button>
               <pre><code>make check-prereqs
 make build
@@ -111,6 +125,7 @@ winget install Hashicorp.Terraform</code></pre>
             </div>
             <div class="command-block">
               <div class="command-title">Verify and build</div>
+              <p class="command-context">Run from the DeployKit project folder in PowerShell.</p>
               <button class="copy-button" type="button" data-copy=".\scripts\check-prereqs.ps1&#10;New-Item -ItemType Directory -Force bin&#10;go build -o bin\deployctl.exe .\cmd\deployctl">Copy</button>
               <pre><code>.\scripts\check-prereqs.ps1
 New-Item -ItemType Directory -Force bin
@@ -127,6 +142,7 @@ sudo apt-get install -y git make ca-certificates curl gnupg</code></pre>
             </div>
             <div class="command-block">
               <div class="command-title">Verify and build</div>
+              <p class="command-context">Run from the DeployKit project folder after cloning this repository.</p>
               <button class="copy-button" type="button" data-copy="scripts/check-prereqs.sh&#10;make build&#10;make smoke-test">Copy</button>
               <pre><code>scripts/check-prereqs.sh
 make build
@@ -136,15 +152,15 @@ make smoke-test</code></pre>
         </div>
       </section>
 
-      <section id="workflow" class="section split">
-        <div class="section-heading">
+      <section id="workflow" class="section split" data-section="workflow">
+        <div class="section-heading reveal">
           <p class="eyebrow">Deployment flow</p>
           <h2>One CLI path from repository to HTTPS</h2>
           <p>
             The CLI owns orchestration. Kubernetes owns runtime behavior. That keeps the platform understandable and resilient.
           </p>
         </div>
-        <ol class="timeline">
+        <ol class="timeline reveal-group">
           <li>
             <span>01</span>
             <strong>Build and push</strong>
@@ -168,12 +184,12 @@ make smoke-test</code></pre>
         </ol>
       </section>
 
-      <section id="production" class="section">
-        <div class="section-heading">
+      <section id="production" class="section" data-section="production">
+        <div class="section-heading reveal">
           <p class="eyebrow">Production-minded by default</p>
           <h2>Hardening that does not need paid infrastructure</h2>
         </div>
-        <div class="feature-grid">
+        <div class="feature-grid reveal-group">
           <article>
             <span class="feature-kicker">Security</span>
             <h3>Non-root runtime</h3>
@@ -197,12 +213,12 @@ make smoke-test</code></pre>
         </div>
       </section>
 
-      <section id="docs" class="section docs-section">
-        <div class="section-heading">
+      <section id="docs" class="section docs-section" data-section="docs">
+        <div class="section-heading reveal">
           <p class="eyebrow">Project guide</p>
           <h2>Read the engineering notes</h2>
         </div>
-        <div class="doc-links">
+        <div class="doc-links reveal-group">
           <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/README.md">README</a>
           <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/prerequisites.md">Prerequisites</a>
           <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/architecture.md">Architecture</a>
