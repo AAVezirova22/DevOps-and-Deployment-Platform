@@ -19,11 +19,15 @@ const usage = `deployctl is a lightweight self-hosted deployment platform CLI.
 Usage:
   deployctl init [--force]
   deployctl deploy [--config deploykit.yaml] [--dry-run] [--no-build] [--no-push] [--tag v1]
+  deployctl status [--config deploykit.yaml]
+  deployctl rollback [--config deploykit.yaml]
   deployctl render [--config deploykit.yaml]
 
 Commands:
   init      create a starter deploykit.yaml for the current repository
   deploy    build a container, apply Kubernetes resources, verify rollout, rollback on failure
+  status    show deployment, ingress, certificate, and release-record status
+  rollback  manually roll back the Kubernetes deployment to the previous revision
   render    print the Kubernetes manifests without applying them
 `
 
@@ -39,6 +43,10 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		return runInit(args[1:], stdout)
 	case "deploy":
 		return runDeploy(ctx, args[1:], stdout, stderr)
+	case "status":
+		return runStatus(ctx, args[1:], stdout, stderr)
+	case "rollback":
+		return runRollback(ctx, args[1:], stdout, stderr)
 	case "render":
 		return runRender(args[1:], stdout)
 	default:
@@ -67,6 +75,25 @@ func runInit(args []string, stdout io.Writer) error {
 	}
 	fmt.Fprintf(stdout, "created %s\n", path)
 	return nil
+}
+
+func loadConfigFromFlags(command string, args []string) (config.Config, error) {
+	fs := flag.NewFlagSet(command, flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	configPath := fs.String("config", "deploykit.yaml", "path to deployment config")
+	if err := fs.Parse(args); err != nil {
+		return config.Config{}, err
+	}
+
+	cfg, err := config.LoadFile(*configPath)
+	if err != nil {
+		return config.Config{}, err
+	}
+	cfg.ApplyDefaults()
+	if err := cfg.Validate(); err != nil {
+		return config.Config{}, err
+	}
+	return cfg, nil
 }
 
 func runDeploy(ctx context.Context, args []string, stdout, stderr io.Writer) error {
@@ -98,6 +125,22 @@ func runDeploy(ctx context.Context, args []string, stdout, stderr io.Writer) err
 		NoBuild: *noBuild,
 		NoPush:  *noPush,
 	})
+}
+
+func runStatus(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	cfg, err := loadConfigFromFlags("status", args)
+	if err != nil {
+		return err
+	}
+	return deploy.New(runner.OSCommandRunner{}, stdout, stderr).Status(ctx, cfg)
+}
+
+func runRollback(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	cfg, err := loadConfigFromFlags("rollback", args)
+	if err != nil {
+		return err
+	}
+	return deploy.New(runner.OSCommandRunner{}, stdout, stderr).Rollback(ctx, cfg)
 }
 
 func runRender(args []string, stdout io.Writer) error {

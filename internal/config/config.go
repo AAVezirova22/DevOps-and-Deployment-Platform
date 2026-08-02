@@ -4,27 +4,38 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
 
 // Config is the project-level deployment contract consumed by deployctl.
 type Config struct {
-	Name          string
-	Namespace     string
-	Registry      string
-	Image         string
-	Tag           string
-	Domain        string
-	Port          int
-	Replicas      int
-	Context       string
-	Dockerfile    string
-	IngressClass  string
-	ClusterIssuer string
-	HealthPath    string
-	Env           map[string]string
-	Rollback      RollbackConfig
+	Name           string
+	Namespace      string
+	Registry       string
+	Image          string
+	Tag            string
+	Domain         string
+	Port           int
+	Replicas       int
+	Context        string
+	Dockerfile     string
+	IngressClass   string
+	ClusterIssuer  string
+	HealthPath     string
+	ServiceAccount string
+	SecretRefs     []string
+	Env            map[string]string
+	Resources      ResourceConfig
+	Rollback       RollbackConfig
+}
+
+type ResourceConfig struct {
+	CPURequest    string
+	MemoryRequest string
+	CPULimit      string
+	MemoryLimit   string
 }
 
 type RollbackConfig struct {
@@ -98,7 +109,11 @@ func ParseYAML(input string) (Config, error) {
 				cfg.ClusterIssuer = clean(value)
 			case "healthPath":
 				cfg.HealthPath = clean(value)
-			case "env", "rollback":
+			case "serviceAccount":
+				cfg.ServiceAccount = clean(value)
+			case "secretRefs":
+				cfg.SecretRefs = parseInlineList(value)
+			case "env", "resources", "rollback":
 				section = key
 			default:
 				return Config{}, fmt.Errorf("line %d: unknown config key %q", lineNo, key)
@@ -113,6 +128,23 @@ func ParseYAML(input string) (Config, error) {
 				return Config{}, fmt.Errorf("line %d: expected env key: value", lineNo)
 			}
 			cfg.Env[key] = clean(value)
+		case "resources":
+			key, value, ok := splitKeyValue(line)
+			if !ok {
+				return Config{}, fmt.Errorf("line %d: expected resources key: value", lineNo)
+			}
+			switch key {
+			case "cpuRequest":
+				cfg.Resources.CPURequest = clean(value)
+			case "memoryRequest":
+				cfg.Resources.MemoryRequest = clean(value)
+			case "cpuLimit":
+				cfg.Resources.CPULimit = clean(value)
+			case "memoryLimit":
+				cfg.Resources.MemoryLimit = clean(value)
+			default:
+				return Config{}, fmt.Errorf("line %d: unknown resources key %q", lineNo, key)
+			}
 		case "rollback":
 			key, value, ok := splitKeyValue(line)
 			if !ok {
@@ -168,6 +200,21 @@ func (c *Config) ApplyDefaults() {
 	if c.HealthPath == "" {
 		c.HealthPath = "/"
 	}
+	if c.ServiceAccount == "" {
+		c.ServiceAccount = c.Name
+	}
+	if c.Resources.CPURequest == "" {
+		c.Resources.CPURequest = "100m"
+	}
+	if c.Resources.MemoryRequest == "" {
+		c.Resources.MemoryRequest = "128Mi"
+	}
+	if c.Resources.CPULimit == "" {
+		c.Resources.CPULimit = "500m"
+	}
+	if c.Resources.MemoryLimit == "" {
+		c.Resources.MemoryLimit = "512Mi"
+	}
 	if len(c.Rollback.FailureText) == 0 {
 		c.Rollback.FailureText = []string{"panic:", "fatal", "exception", "crashloopbackoff", "imagepullbackoff"}
 	}
@@ -177,8 +224,22 @@ func (c Config) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("name is required")
 	}
+	if !isDNSLabel(c.Name) {
+		return fmt.Errorf("name must be a lowercase DNS label")
+	}
 	if c.Domain == "" {
 		return fmt.Errorf("domain is required")
+	}
+	if !isDNSSubdomain(c.Namespace) {
+		return fmt.Errorf("namespace must be a lowercase DNS subdomain")
+	}
+	if !isDNSLabel(c.ServiceAccount) {
+		return fmt.Errorf("serviceAccount must be a lowercase DNS label")
+	}
+	for _, secretRef := range c.SecretRefs {
+		if !isDNSSubdomain(secretRef) {
+			return fmt.Errorf("secretRefs contains invalid secret name %q", secretRef)
+		}
 	}
 	if c.Port < 1 || c.Port > 65535 {
 		return fmt.Errorf("port must be between 1 and 65535")
@@ -187,6 +248,19 @@ func (c Config) Validate() error {
 		return fmt.Errorf("replicas must be at least 1")
 	}
 	return nil
+}
+
+var (
+	dnsLabelRE     = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
+	dnsSubdomainRE = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
+)
+
+func isDNSLabel(value string) bool {
+	return len(value) <= 63 && dnsLabelRE.MatchString(value)
+}
+
+func isDNSSubdomain(value string) bool {
+	return len(value) <= 253 && dnsSubdomainRE.MatchString(value)
 }
 
 func (c Config) ImageRef() string {
@@ -229,12 +303,19 @@ dockerfile: Dockerfile
 ingressClass: nginx
 clusterIssuer: letsencrypt-prod
 healthPath: /
+serviceAccount: %s
+secretRefs: []
 env:
   APP_ENV: production
+resources:
+  cpuRequest: 100m
+  memoryRequest: 128Mi
+  cpuLimit: 500m
+  memoryLimit: 512Mi
 rollback:
   enabled: true
   failureText: [panic:, fatal, exception, crashloopbackoff, imagepullbackoff]
-`, projectName, projectName, projectName)
+`, projectName, projectName, projectName, projectName)
 }
 
 func splitKeyValue(line string) (string, string, bool) {

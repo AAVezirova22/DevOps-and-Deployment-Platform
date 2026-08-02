@@ -7,9 +7,16 @@ func TestParseYAMLAppliesStructuredFields(t *testing.T) {
 domain: api.example.com
 port: 3000
 replicas: 3
+serviceAccount: api-runtime
+secretRefs: [api-secrets, registry-secret]
 env:
   APP_ENV: production
   LOG_LEVEL: info
+resources:
+  cpuRequest: 200m
+  memoryRequest: 256Mi
+  cpuLimit: 1
+  memoryLimit: 1Gi
 rollback:
   enabled: true
   failureText: [panic:, fatal]
@@ -27,6 +34,12 @@ rollback:
 	}
 	if cfg.Env["APP_ENV"] != "production" || cfg.Rollback.FailureText[1] != "fatal" {
 		t.Fatalf("nested values were not parsed: %+v", cfg)
+	}
+	if cfg.ServiceAccount != "api-runtime" || cfg.SecretRefs[1] != "registry-secret" {
+		t.Fatalf("production identity values were not parsed: %+v", cfg)
+	}
+	if cfg.Resources.CPURequest != "200m" || cfg.Resources.MemoryLimit != "1Gi" {
+		t.Fatalf("resource values were not parsed: %+v", cfg.Resources)
 	}
 }
 
@@ -53,5 +66,13 @@ func TestImageRefLowercasesExplicitImageRepositoryButPreservesTag(t *testing.T) 
 	want := "ghcr.io/aavezirova22/api:Release-Candidate"
 	if got != want {
 		t.Fatalf("ImageRef() = %q, want %q", got, want)
+	}
+}
+
+func TestValidateRejectsInvalidKubernetesNames(t *testing.T) {
+	cfg := Config{Name: "Demo_API", Domain: "demo.example.com"}
+	cfg.ApplyDefaults()
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected invalid Kubernetes name validation error")
 	}
 }

@@ -10,9 +10,16 @@ dockerfile: Dockerfile
 ingressClass: nginx
 clusterIssuer: letsencrypt-prod
 healthPath: /healthz
+serviceAccount: demo-api
+secretRefs: [demo-api-secrets]
 env:
   APP_ENV: production
   LOG_LEVEL: info
+resources:
+  cpuRequest: 100m
+  memoryRequest: 128Mi
+  cpuLimit: 500m
+  memoryLimit: 512Mi
 rollback:
   enabled: true
   failureText: [panic:, fatal, exception, crashloopbackoff, imagepullbackoff]
