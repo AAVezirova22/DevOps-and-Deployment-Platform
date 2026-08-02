@@ -13,8 +13,11 @@ DeployKit includes two GitHub Actions workflows.
 - renders example Kubernetes manifests,
 - normalizes the GHCR image repository to lowercase,
 - publishes the CLI container image to GHCR on pushes to `main`.
+- validates Kubernetes manifests against a real kind API server with server-side dry-run.
 
 This catches broken CLI code, invalid manifest rendering, and container packaging regressions before deployment.
+
+The kind smoke test costs nothing and does not require cloud credentials. It validates API compatibility, not public ingress, DNS, or Let's Encrypt issuance.
 
 ## Manual Deployment
 

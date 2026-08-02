@@ -34,7 +34,8 @@ public HTTPS URL
 6. It waits for `kubectl rollout status`.
 7. It reads recent deployment logs and scans for configured failure signatures.
 8. If verification fails and rollback is enabled, it runs `kubectl rollout undo`.
-9. On success, it prints the HTTPS URL derived from the configured domain.
+9. On success, it records the release as a Kubernetes ConfigMap.
+10. It prints the HTTPS URL derived from the configured domain.
 
 ## Isolation Model
 
@@ -54,11 +55,13 @@ This is intentionally simpler than creating a whole cluster per service. For the
 DeployKit renders these Kubernetes resources:
 
 - `Namespace`: isolates service resources.
+- `ServiceAccount`: gives each service an explicit runtime identity.
+- `Role` and `RoleBinding`: provide a namespace-scoped RBAC extension point with no default runtime privileges.
 - `Deployment`: runs application replicas with rolling updates.
 - `Service`: exposes pods inside the cluster.
 - `Ingress`: routes public HTTP/HTTPS traffic to the service.
 
-The Deployment uses readiness and liveness probes against the configured health path. The rollout strategy sets `maxUnavailable: 0` and `maxSurge: 1` so updates keep old pods available while new pods become ready.
+The Deployment uses readiness and liveness probes against the configured health path. The rollout strategy sets `maxUnavailable: 0` and `maxSurge: 1` so updates keep old pods available while new pods become ready. The pod template also includes resource requests/limits and a hardened non-root security context.
 
 ## TLS and Networking
 
@@ -91,6 +94,10 @@ kubectl rollout undo deployment/<service> -n <namespace>
 ```
 
 This uses Kubernetes revision history instead of a custom release database. That keeps the first version reliable and understandable.
+
+## Release Records
+
+After a successful rollout and log scan, DeployKit writes a ConfigMap with release metadata. This creates a durable cluster-local audit trail without requiring a database.
 
 ## Infrastructure Layer
 

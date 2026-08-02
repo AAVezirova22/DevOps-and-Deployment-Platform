@@ -54,3 +54,23 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.image.outputs.name }}:${{ github.sha }}
+
+  kind-smoke:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: deploykit-smoke
+
+      - name: Server-side Kubernetes manifest validation
+        run: scripts/kind-smoke-test.sh

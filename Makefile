@@ -1,4 +1,4 @@
-.PHONY: build test render-example
+.PHONY: build test render-example smoke-test
 
 build:
 	go build -o bin/deployctl ./cmd/deployctl
@@ -8,3 +8,6 @@ test:
 
 render-example:
 	go run ./cmd/deployctl render --config deploykit.example.yaml
+
+smoke-test:
+	scripts/kind-smoke-test.sh

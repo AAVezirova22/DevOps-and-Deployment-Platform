@@ -42,6 +42,25 @@ deployctl deploy --tag "$(git rev-parse --short HEAD)"
 
 For CI deployments, set the tag from the commit SHA and make sure the runner can access Docker, the registry, and the target kubeconfig.
 
+## Secrets
+
+Create Kubernetes Secrets outside `deploykit.yaml`:
+
+```sh
+kubectl create secret generic demo-api-secrets \
+  -n demo-api-prod \
+  --from-literal=DATABASE_URL='postgres://example' \
+  --from-literal=API_TOKEN='replace-me'
+```
+
+Reference the existing secret in the deployment config:
+
+```yaml
+secretRefs: [demo-api-secrets]
+```
+
+DeployKit injects those secrets through `envFrom.secretRef`.
+
 ## DNS
 
 Create an A record from the configured `domain` to the ingress address. On the single-node Hetzner example, this is the server IPv4 address.
@@ -57,6 +76,30 @@ Manual rollback is also available:
 
 ```sh
 kubectl rollout undo deployment/<name> -n <namespace>
+```
+
+Or use the CLI:
+
+```sh
+deployctl rollback --config deploykit.yaml
+```
+
+## Status
+
+Check the operational state with:
+
+```sh
+deployctl status --config deploykit.yaml
+```
+
+This reports Deployment, Service, Ingress, certificate, and release-record information.
+
+## Release Records
+
+Successful deployments write release ConfigMaps in the service namespace. List them with:
+
+```sh
+kubectl get configmap -n <namespace> -l deploykit.io/release=true
 ```
 
 ## Troubleshooting

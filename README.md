@@ -14,6 +14,8 @@ The project is intentionally compact, but it demonstrates the same concerns seni
 - It waits for `kubectl rollout status`.
 - It scans recent deployment logs for configured failure text.
 - It automatically runs `kubectl rollout undo` when rollout verification fails.
+- It records successful releases as Kubernetes ConfigMaps.
+- It renders service accounts, minimal RBAC, resource limits, and hardened pod security settings.
 - It prints the final `https://...` URL when deployment succeeds.
 
 ## Repository Layout
@@ -27,6 +29,7 @@ internal/logscan/              rollback failure pattern detection
 internal/runner/               command execution abstraction
 infra/terraform/hetzner-k3s/   single-node k3s infrastructure example
 scripts/bootstrap-k3s-addons.sh ingress-nginx and cert-manager bootstrap
+scripts/kind-smoke-test.sh     no-cost Kubernetes API smoke test
 .github/workflows/             CI and manual deployment workflows
 docs/                          architecture, customers, operations, decisions
 ```
@@ -82,8 +85,15 @@ dockerfile: Dockerfile
 ingressClass: nginx
 clusterIssuer: letsencrypt-prod
 healthPath: /healthz
+serviceAccount: demo-api
+secretRefs: [demo-api-secrets]
 env:
   APP_ENV: production
+resources:
+  cpuRequest: 100m
+  memoryRequest: 128Mi
+  cpuLimit: 500m
+  memoryLimit: 512Mi
 rollback:
   enabled: true
   failureText: [panic:, fatal, exception, crashloopbackoff, imagepullbackoff]
@@ -120,6 +130,34 @@ $tag = git rev-parse --short HEAD
 
 For local clusters that can directly access the local Docker image, use `--no-push`.
 
+Check deployment status:
+
+macOS or Linux:
+
+```sh
+./bin/deployctl status --config deploykit.yaml
+```
+
+Windows PowerShell:
+
+```powershell
+.\bin\deployctl.exe status --config deploykit.yaml
+```
+
+Manually roll back to the previous Kubernetes revision:
+
+macOS or Linux:
+
+```sh
+./bin/deployctl rollback --config deploykit.yaml
+```
+
+Windows PowerShell:
+
+```powershell
+.\bin\deployctl.exe rollback --config deploykit.yaml
+```
+
 ## Platform Prerequisites
 
 The target cluster needs:
@@ -141,14 +179,18 @@ DeployKit has four layers:
 2. Build layer: runs Docker locally or in CI to produce an immutable image.
 3. Runtime layer: applies Kubernetes resources into a service-specific namespace.
 4. Safety layer: verifies rollouts, scans logs, and triggers Kubernetes rollback if the new release is unhealthy.
+5. Operations layer: records release history and exposes status/rollback commands.
 
 See [docs/architecture.md](docs/architecture.md) for the full architecture.
+
+See [docs/production-readiness.md](docs/production-readiness.md) for the production-hardening checklist and the limits of what can be proven without paid cloud infrastructure.
 
 ## CI/CD Pipeline
 
 The repository includes:
 
 - `ci.yml` for tests, CLI build, manifest rendering, and container image publishing.
+- a kind smoke test for no-cost Kubernetes API validation.
 - `deploy.yml` for manual GitHub Actions deployments using a base64 kubeconfig secret.
 
 See [docs/ci-cd.md](docs/ci-cd.md) for pipeline details and recommended branch rules.
@@ -201,6 +243,12 @@ Render example manifests on Windows PowerShell:
 
 ```powershell
 go run .\cmd\deployctl render --config deploykit.example.yaml
+```
+
+Run the no-cost Kubernetes API smoke test with kind:
+
+```sh
+make smoke-test
 ```
 
 Build the container image:
