@@ -1,0 +1,8 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - ca-certificates
+runcmd:
+  - curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=${k3s_channel} sh -s - --write-kubeconfig-mode 644

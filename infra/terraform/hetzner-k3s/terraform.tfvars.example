@@ -1,0 +1,6 @@
+hcloud_token    = "replace-me"
+project_name    = "deploykit"
+ssh_public_key  = "ssh-ed25519 AAAA..."
+admin_cidrs     = ["203.0.113.10/32"]
+server_location = "fsn1"
+server_type     = "cx22"
