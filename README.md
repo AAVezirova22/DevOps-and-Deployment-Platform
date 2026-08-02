@@ -29,6 +29,8 @@ internal/logscan/              rollback failure pattern detection
 internal/runner/               command execution abstraction
 infra/terraform/hetzner-k3s/   single-node k3s infrastructure example
 scripts/bootstrap-k3s-addons.sh ingress-nginx and cert-manager bootstrap
+scripts/check-prereqs.sh      macOS/Linux prerequisite checker
+scripts/check-prereqs.ps1     Windows prerequisite checker
 scripts/kind-smoke-test.sh     no-cost Kubernetes API smoke test
 .github/workflows/             CI and manual deployment workflows
 docs/                          architecture, customers, operations, decisions
@@ -41,7 +43,15 @@ Install prerequisites:
 - Go 1.22 or newer
 - Docker Desktop
 - `kubectl`
+- kind
+- Terraform
 - access to a Kubernetes cluster
+
+See [docs/prerequisites.md](docs/prerequisites.md) for macOS, Windows, and Linux install commands. You can verify your machine with:
+
+```sh
+make check-prereqs
+```
 
 Build the CLI on macOS or Linux:
 

@@ -1,4 +1,6 @@
-.PHONY: build test render-example smoke-test
+.PHONY: build test render-example smoke-test check-prereqs
+
+export GOCACHE ?= $(CURDIR)/.cache/go-build
 
 build:
 	go build -o bin/deployctl ./cmd/deployctl
@@ -11,3 +13,6 @@ render-example:
 
 smoke-test:
 	scripts/kind-smoke-test.sh
+
+check-prereqs:
+	scripts/check-prereqs.sh
