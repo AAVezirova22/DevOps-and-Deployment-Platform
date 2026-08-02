@@ -1,0 +1,18 @@
+name: demo-api
+namespace: demo-api-prod
+registry: ghcr.io/example
+tag: latest
+domain: demo-api.example.com
+port: 8080
+replicas: 2
+context: .
+dockerfile: Dockerfile
+ingressClass: nginx
+clusterIssuer: letsencrypt-prod
+healthPath: /healthz
+env:
+  APP_ENV: production
+  LOG_LEVEL: info
+rollback:
+  enabled: true
+  failureText: [panic:, fatal, exception, crashloopbackoff, imagepullbackoff]
