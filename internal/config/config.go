@@ -191,13 +191,26 @@ func (c Config) Validate() error {
 
 func (c Config) ImageRef() string {
 	if c.Image != "" {
-		return c.Image
+		return normalizeImageRef(c.Image)
 	}
 	base := c.Name
 	if c.Registry != "" {
 		base = strings.TrimSuffix(c.Registry, "/") + "/" + c.Name
 	}
-	return base + ":" + c.Tag
+	return normalizeImageRef(base + ":" + c.Tag)
+}
+
+func normalizeImageRef(ref string) string {
+	name := ref
+	suffix := ""
+	if idx := strings.Index(name, "@"); idx >= 0 {
+		suffix = name[idx:]
+		name = name[:idx]
+	} else if idx := strings.LastIndex(name, ":"); idx > strings.LastIndex(name, "/") {
+		suffix = name[idx:]
+		name = name[:idx]
+	}
+	return strings.ToLower(name) + suffix
 }
 
 func StarterYAML(projectName string) string {

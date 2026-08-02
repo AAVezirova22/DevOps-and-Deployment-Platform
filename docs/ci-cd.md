@@ -11,6 +11,7 @@ DeployKit includes two GitHub Actions workflows.
 - runs `go test ./...`,
 - builds the `deployctl` binary,
 - renders example Kubernetes manifests,
+- normalizes the GHCR image repository to lowercase,
 - publishes the CLI container image to GHCR on pushes to `main`.
 
 This catches broken CLI code, invalid manifest rendering, and container packaging regressions before deployment.
@@ -30,6 +31,8 @@ The workflow:
 3. Writes the kubeconfig from `KUBECONFIG_B64`.
 4. Runs `go run ./cmd/deployctl deploy`.
 5. Lets DeployKit build the image, push it, apply Kubernetes manifests, verify rollout, and rollback on failure.
+
+Docker image repository names must be lowercase. The CI workflow handles this for the DeployKit CLI image, and `deployctl` lowercases generated image repository paths when a config uses `registry` plus `name`.
 
 For application repositories that consume a released `deployctl` binary instead of this source tree, replace the final step with a binary download or container invocation.
 

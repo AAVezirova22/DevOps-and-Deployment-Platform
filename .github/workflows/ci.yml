@@ -44,9 +44,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Resolve image name
+        id: image
+        run: echo "name=ghcr.io/${GITHUB_REPOSITORY,,}/deployctl" >> "$GITHUB_OUTPUT"
+
       - name: Build and publish CLI image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/deployctl:${{ github.sha }}
+          tags: ${{ steps.image.outputs.name }}:${{ github.sha }}

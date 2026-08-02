@@ -37,3 +37,21 @@ func TestValidateRequiresDomain(t *testing.T) {
 		t.Fatal("expected missing domain validation error")
 	}
 }
+
+func TestImageRefLowercasesRepositoryPath(t *testing.T) {
+	cfg := Config{Name: "Demo-API", Registry: "ghcr.io/AAVezirova22/DevOps-and-Deployment-Platform", Tag: "ABC123"}
+	got := cfg.ImageRef()
+	want := "ghcr.io/aavezirova22/devops-and-deployment-platform/demo-api:ABC123"
+	if got != want {
+		t.Fatalf("ImageRef() = %q, want %q", got, want)
+	}
+}
+
+func TestImageRefLowercasesExplicitImageRepositoryButPreservesTag(t *testing.T) {
+	cfg := Config{Image: "GHCR.io/AAVezirova22/API:Release-Candidate"}
+	got := cfg.ImageRef()
+	want := "ghcr.io/aavezirova22/api:Release-Candidate"
+	if got != want {
+		t.Fatalf("ImageRef() = %q, want %q", got, want)
+	}
+}
