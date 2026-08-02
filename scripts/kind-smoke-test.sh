@@ -2,10 +2,11 @@
 set -eu
 
 CLUSTER_NAME="${CLUSTER_NAME:-deploykit-smoke}"
-CONFIG_FILE="$(mktemp)"
+CONFIG_FILE=".deploykit-smoke.yaml"
+RENDERED_FILE="/tmp/deploykit-smoke.yaml"
 
 cleanup() {
-  rm -f "$CONFIG_FILE"
+  rm -f "$CONFIG_FILE" "$RENDERED_FILE"
   if [ "${KEEP_KIND_CLUSTER:-}" = "" ]; then
     kind delete cluster --name "$CLUSTER_NAME" >/dev/null 2>&1 || true
   fi
@@ -20,8 +21,24 @@ command -v kubectl >/dev/null 2>&1 || {
   echo "kubectl is required for this smoke test" >&2
   exit 1
 }
-command -v go >/dev/null 2>&1 || {
-  echo "go is required for this smoke test" >&2
+
+render_manifests() {
+  if [ -x "./bin/deployctl" ] && ./bin/deployctl --help >/dev/null 2>&1; then
+    ./bin/deployctl render --config "$CONFIG_FILE"
+    return
+  fi
+
+  if command -v go >/dev/null 2>&1; then
+    go run ./cmd/deployctl render --config "$CONFIG_FILE"
+    return
+  fi
+
+  if command -v docker >/dev/null 2>&1; then
+    docker run --rm -v "$PWD:/src" -w /src golang:1.22-alpine go run ./cmd/deployctl render --config "$CONFIG_FILE"
+    return
+  fi
+
+  echo "deployctl binary, go, or docker is required for this smoke test" >&2
   exit 1
 }
 
@@ -52,5 +69,5 @@ if ! kind get clusters | grep -qx "$CLUSTER_NAME"; then
 fi
 
 kubectl create namespace smoke-api-prod --dry-run=client -o yaml | kubectl apply -f -
-go run ./cmd/deployctl render --config "$CONFIG_FILE" > /tmp/deploykit-smoke.yaml
-kubectl apply --dry-run=server -f /tmp/deploykit-smoke.yaml
+render_manifests > "$RENDERED_FILE"
+kubectl apply --dry-run=server -f "$RENDERED_FILE"
