@@ -27,7 +27,7 @@ internal/logscan/              rollback failure pattern detection
 internal/runner/               command execution abstraction
 infra/terraform/hetzner-k3s/   single-node k3s infrastructure example
 scripts/bootstrap-k3s-addons.sh ingress-nginx and cert-manager bootstrap
-.github/workflows/ci.yml       test, build, render, and container publish workflow
+.github/workflows/             CI and manual deployment workflows
 docs/                          architecture, customers, operations, decisions
 ```
 
@@ -104,6 +104,15 @@ DeployKit has four layers:
 4. Safety layer: verifies rollouts, scans logs, and triggers Kubernetes rollback if the new release is unhealthy.
 
 See [docs/architecture.md](docs/architecture.md) for the full architecture.
+
+## CI/CD Pipeline
+
+The repository includes:
+
+- `ci.yml` for tests, CLI build, manifest rendering, and container image publishing.
+- `deploy.yml` for manual GitHub Actions deployments using a base64 kubeconfig secret.
+
+See [docs/ci-cd.md](docs/ci-cd.md) for pipeline details and recommended branch rules.
 
 ## Why These Technologies
 
