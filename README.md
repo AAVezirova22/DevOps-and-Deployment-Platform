@@ -33,16 +33,38 @@ docs/                          architecture, customers, operations, decisions
 
 ## Quick Start
 
-Build the CLI:
+Install prerequisites:
+
+- Go 1.22 or newer
+- Docker Desktop
+- `kubectl`
+- access to a Kubernetes cluster
+
+Build the CLI on macOS or Linux:
 
 ```sh
 make build
 ```
 
+Build the CLI on Windows PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force bin
+go build -o bin\deployctl.exe .\cmd\deployctl
+```
+
 Create a deployment config in another application repository:
 
+macOS or Linux:
+
 ```sh
-deployctl init
+./bin/deployctl init
+```
+
+Windows PowerShell:
+
+```powershell
+.\bin\deployctl.exe init
 ```
 
 Edit `deploykit.yaml` with your registry, domain, port, and environment variables:
@@ -69,14 +91,31 @@ rollback:
 
 Preview Kubernetes resources before applying them:
 
+macOS or Linux:
+
 ```sh
-deployctl render --config deploykit.yaml
+./bin/deployctl render --config deploykit.yaml
+```
+
+Windows PowerShell:
+
+```powershell
+.\bin\deployctl.exe render --config deploykit.yaml
 ```
 
 Deploy:
 
+macOS or Linux:
+
 ```sh
-deployctl deploy --config deploykit.yaml --tag "$(git rev-parse --short HEAD)"
+./bin/deployctl deploy --config deploykit.yaml --tag "$(git rev-parse --short HEAD)"
+```
+
+Windows PowerShell:
+
+```powershell
+$tag = git rev-parse --short HEAD
+.\bin\deployctl.exe deploy --config deploykit.yaml --tag $tag
 ```
 
 For local clusters that can directly access the local Docker image, use `--no-push`.
@@ -140,16 +179,28 @@ See [docs/target-customers.md](docs/target-customers.md) for a deeper customer b
 
 ## Development
 
-Run tests:
+Run tests on macOS or Linux:
 
 ```sh
 make test
 ```
 
-Render example manifests:
+Run tests on Windows PowerShell:
+
+```powershell
+go test ./...
+```
+
+Render example manifests on macOS or Linux:
 
 ```sh
 make render-example
+```
+
+Render example manifests on Windows PowerShell:
+
+```powershell
+go run .\cmd\deployctl render --config deploykit.example.yaml
 ```
 
 Build the container image:
