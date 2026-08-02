@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="DeployKit is a lightweight self-hosted deployment platform with a Go CLI, Docker, Kubernetes, Terraform, and GitHub Actions."
+    />
+    <title>DeployKit | Self-hosted deployment platform</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="DeployKit home">
+        <span class="brand-mark">dk</span>
+        <span>DeployKit</span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#install">Install</a>
+        <a href="#workflow">Workflow</a>
+        <a href="#production">Production</a>
+        <a href="#docs">Docs</a>
+      </nav>
+      <a class="header-action" href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform">GitHub</a>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <img
+          class="hero-image"
+          src="assets/deploykit-hero.png"
+          alt="A developer workstation showing deployment status, service cards, logs, and infrastructure topology"
+        />
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="eyebrow">Self-hosted deployments for small teams</p>
+          <h1>DeployKit</h1>
+          <p class="hero-copy">
+            A compact developer platform that builds containers, deploys to Kubernetes, configures HTTPS, records releases, and rolls back unhealthy rollouts.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-button" href="#install">Start locally</a>
+            <a class="secondary-button" href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform">View source</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="status-strip" aria-label="Project capabilities">
+        <div>
+          <span class="metric">Go CLI</span>
+          <span class="caption">single binary workflow</span>
+        </div>
+        <div>
+          <span class="metric">Kubernetes</span>
+          <span class="caption">namespaces, ingress, rollback</span>
+        </div>
+        <div>
+          <span class="metric">Terraform</span>
+          <span class="caption">Hetzner k3s bootstrap</span>
+        </div>
+        <div>
+          <span class="metric">CI/CD</span>
+          <span class="caption">GitHub Actions plus kind smoke test</span>
+        </div>
+      </section>
+
+      <section id="install" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Run it locally</p>
+          <h2>Install, check, deploy</h2>
+          <p>
+            DeployKit stays close to the tools platform engineers already use: Go, Docker, kubectl, kind, Terraform, and Git.
+          </p>
+        </div>
+
+        <div class="command-panel">
+          <div class="tabs" role="tablist" aria-label="Operating system commands">
+            <button class="tab is-active" type="button" data-tab="mac">macOS</button>
+            <button class="tab" type="button" data-tab="windows">Windows</button>
+            <button class="tab" type="button" data-tab="linux">Linux</button>
+          </div>
+
+          <div class="tab-panel is-active" id="tab-mac">
+            <div class="command-block">
+              <div class="command-title">Install tools</div>
+              <button class="copy-button" type="button" data-copy="brew install go kubectl kind&#10;brew tap hashicorp/tap&#10;brew install hashicorp/tap/terraform">Copy</button>
+              <pre><code>brew install go kubectl kind
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform</code></pre>
+            </div>
+            <div class="command-block">
+              <div class="command-title">Verify and build</div>
+              <button class="copy-button" type="button" data-copy="make check-prereqs&#10;make build&#10;make smoke-test">Copy</button>
+              <pre><code>make check-prereqs
+make build
+make smoke-test</code></pre>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-windows">
+            <div class="command-block">
+              <div class="command-title">Install tools with winget</div>
+              <button class="copy-button" type="button" data-copy="winget install GoLang.Go&#10;winget install Docker.DockerDesktop&#10;winget install Kubernetes.kubectl&#10;winget install Kubernetes.kind&#10;winget install Git.Git&#10;winget install Hashicorp.Terraform">Copy</button>
+              <pre><code>winget install GoLang.Go
+winget install Docker.DockerDesktop
+winget install Kubernetes.kubectl
+winget install Kubernetes.kind
+winget install Git.Git
+winget install Hashicorp.Terraform</code></pre>
+            </div>
+            <div class="command-block">
+              <div class="command-title">Verify and build</div>
+              <button class="copy-button" type="button" data-copy=".\scripts\check-prereqs.ps1&#10;New-Item -ItemType Directory -Force bin&#10;go build -o bin\deployctl.exe .\cmd\deployctl">Copy</button>
+              <pre><code>.\scripts\check-prereqs.ps1
+New-Item -ItemType Directory -Force bin
+go build -o bin\deployctl.exe .\cmd\deployctl</code></pre>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-linux">
+            <div class="command-block">
+              <div class="command-title">Base packages</div>
+              <button class="copy-button" type="button" data-copy="sudo apt-get update&#10;sudo apt-get install -y git make ca-certificates curl gnupg">Copy</button>
+              <pre><code>sudo apt-get update
+sudo apt-get install -y git make ca-certificates curl gnupg</code></pre>
+            </div>
+            <div class="command-block">
+              <div class="command-title">Verify and build</div>
+              <button class="copy-button" type="button" data-copy="scripts/check-prereqs.sh&#10;make build&#10;make smoke-test">Copy</button>
+              <pre><code>scripts/check-prereqs.sh
+make build
+make smoke-test</code></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow" class="section split">
+        <div class="section-heading">
+          <p class="eyebrow">Deployment flow</p>
+          <h2>One CLI path from repository to HTTPS</h2>
+          <p>
+            The CLI owns orchestration. Kubernetes owns runtime behavior. That keeps the platform understandable and resilient.
+          </p>
+        </div>
+        <ol class="timeline">
+          <li>
+            <span>01</span>
+            <strong>Build and push</strong>
+            <p>Docker packages the application and pushes an immutable image tag to the registry.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <strong>Apply runtime resources</strong>
+            <p>DeployKit renders Namespace, ServiceAccount, RBAC, Deployment, Service, and Ingress manifests.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <strong>Verify rollout</strong>
+            <p>Readiness checks, rollout status, and deployment log scanning decide whether the release is healthy.</p>
+          </li>
+          <li>
+            <span>04</span>
+            <strong>Record or rollback</strong>
+            <p>Successful releases are recorded. Failed rollouts trigger Kubernetes rollback.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="production" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Production-minded by default</p>
+          <h2>Hardening that does not need paid infrastructure</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span class="feature-kicker">Security</span>
+            <h3>Non-root runtime</h3>
+            <p>Pods run with token automount disabled, privilege escalation off, dropped capabilities, and a read-only root filesystem.</p>
+          </article>
+          <article>
+            <span class="feature-kicker">Reliability</span>
+            <h3>Rollback path</h3>
+            <p>Failed rollout checks or matching failure logs trigger `kubectl rollout undo` without a custom scheduler.</p>
+          </article>
+          <article>
+            <span class="feature-kicker">Operations</span>
+            <h3>Release records</h3>
+            <p>Successful deployments write cluster-local ConfigMaps with image, tag, domain, and timestamp metadata.</p>
+          </article>
+          <article>
+            <span class="feature-kicker">Validation</span>
+            <h3>kind smoke test</h3>
+            <p>A local Kubernetes API verifies generated manifests using server-side dry-run before real cluster changes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="docs" class="section docs-section">
+        <div class="section-heading">
+          <p class="eyebrow">Project guide</p>
+          <h2>Read the engineering notes</h2>
+        </div>
+        <div class="doc-links">
+          <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/README.md">README</a>
+          <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/prerequisites.md">Prerequisites</a>
+          <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/architecture.md">Architecture</a>
+          <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/production-readiness.md">Production readiness</a>
+          <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/operations.md">Operations</a>
+          <a href="https://github.com/AAVezirova22/DevOps-and-Deployment-Platform/blob/main/docs/ci-cd.md">CI/CD</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>DeployKit</span>
+      <span>Self-hosted deployment automation with Go, Docker, Kubernetes, Terraform, and GitHub Actions.</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

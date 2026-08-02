@@ -1,6 +1,6 @@
 # CI/CD Pipeline
 
-DeployKit includes two GitHub Actions workflows.
+DeployKit includes three GitHub Actions workflows.
 
 ## Continuous Integration
 
@@ -38,6 +38,12 @@ The workflow:
 Docker image repository names must be lowercase. The CI workflow handles this for the DeployKit CLI image, and `deployctl` lowercases generated image repository paths when a config uses `registry` plus `name`.
 
 For application repositories that consume a released `deployctl` binary instead of this source tree, replace the final step with a binary download or container invocation.
+
+## GitHub Pages
+
+`.github/workflows/pages.yml` publishes the static project UI from `site/` to GitHub Pages. The site is intentionally static, so it does not need a backend, database, or paid hosting service.
+
+If Pages is not active, open the repository settings and set the Pages source to GitHub Actions.
 
 ## Failure Handling
 

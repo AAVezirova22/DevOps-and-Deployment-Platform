@@ -34,6 +34,7 @@ scripts/check-prereqs.ps1     Windows prerequisite checker
 scripts/kind-smoke-test.sh     no-cost Kubernetes API smoke test
 .github/workflows/             CI and manual deployment workflows
 docs/                          architecture, customers, operations, decisions
+site/                          responsive GitHub Pages project UI
 ```
 
 ## Quick Start
@@ -202,8 +203,15 @@ The repository includes:
 - `ci.yml` for tests, CLI build, manifest rendering, and container image publishing.
 - a kind smoke test for no-cost Kubernetes API validation.
 - `deploy.yml` for manual GitHub Actions deployments using a base64 kubeconfig secret.
+- `pages.yml` for publishing the static project UI from `site/` to GitHub Pages.
 
 See [docs/ci-cd.md](docs/ci-cd.md) for pipeline details and recommended branch rules.
+
+## Hosted Project UI
+
+The `site/` directory contains a responsive static UI for GitHub Pages. It gives visitors a quicker way to understand the project, copy install commands, and jump into the engineering docs.
+
+GitHub Pages deployment is handled by `.github/workflows/pages.yml`. In the repository settings, set Pages source to GitHub Actions if it is not already enabled.
 
 ## Why These Technologies
 
