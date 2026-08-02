@@ -3,10 +3,9 @@
 ## Near Term
 
 - Push images to the configured registry after build.
-- Add `deployctl rollback` as a first-class command.
-- Add `deployctl status` for release health and ingress certificate state.
 - Support config overlays for staging and production.
-- Add resource requests and limits to the deployment config.
+- Add configurable pod security profiles for applications that cannot run with the hardened defaults.
+- Add first-class secret creation helpers for teams that do not use Sealed Secrets, SOPS, or External Secrets Operator.
 
 ## Platform Features
 
